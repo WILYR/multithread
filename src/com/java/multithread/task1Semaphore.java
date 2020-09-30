@@ -1,6 +1,7 @@
 package com.java.multithread;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Semaphore;
 
 class AThread implements Runnable {
 
@@ -27,36 +28,27 @@ class CThread implements Runnable {
 }
 
 class Foo {
-    public int number = 1;
-    synchronized public void first(Runnable thread) throws InterruptedException {
-        while (number != 1) {
-            wait();
-        }
+    Semaphore semaphore = new Semaphore(0);
+    Semaphore semaphore2 = new Semaphore(0);
+
+    public void first(Runnable thread) throws InterruptedException {
         thread.run();
-        number++;
-        notifyAll();
+        semaphore.release();
     }
 
-    synchronized public void second(Runnable thread) throws InterruptedException {
-        while (number != 2) {
-            wait();
-        }
+    public void second(Runnable thread) throws InterruptedException {
+        semaphore.acquire();
         thread.run();
-        number++;
-        notifyAll();
+        semaphore2.release();
     }
 
     synchronized public void third(Runnable thread) throws InterruptedException {
-        while (number != 3) {
-            wait();
-        }
+        semaphore2.acquire();
         thread.run();
-        number++;
-        notifyAll();
     }
 }
 
-public class task1 {
+public class task1Semaphore {
     public static void main(String[] args) throws InterruptedException {
         Foo foo = new Foo();
         Runnable threadA = new AThread();
